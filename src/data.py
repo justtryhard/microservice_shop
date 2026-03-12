@@ -2,7 +2,7 @@ from src.models.user import User
 from src.models.product import Product
 from src.models.order import Order
 
-# Продукты
+# продукты
 p1 = Product(name='bread', price=2.5, quantity=2)
 p2 = Product(name='curd', price=3.0, quantity=1)
 p3 = Product(name='milk', price=1.8, quantity=3)
