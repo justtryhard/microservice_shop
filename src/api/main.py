@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from src.api.routes import orders
+from src.api.routes import orders, exchange
 
 app = FastAPI(
     title="Order Service",
@@ -8,7 +8,7 @@ app = FastAPI(
 )
 
 app.include_router(orders.router)
-
+app.include_router(exchange.router)
 
 @app.get("/test")
 async def service_check():
