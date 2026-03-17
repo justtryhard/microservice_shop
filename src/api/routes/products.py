@@ -28,9 +28,12 @@ async def get_product(product_id: int):
 
 @router.get("/")
 async def get_products():
-    cached = redis_client.get("products")
-    if cached:
-        return json.loads(cached)
-    products = await ProductService.get_products()
-    redis_client.setex("products", 3600, json.dumps(products))
-    return products
+    try:
+        cached = redis_client.get("products")
+        if cached:
+            return json.loads(cached)
+        products = await ProductService.get_products()
+        redis_client.setex("products", 3600, json.dumps(products))
+        return products
+    except redis.exceptions.ConnectionError:  # если редис недоступен, идём сразу в БД
+        return await ProductService.get_products()
