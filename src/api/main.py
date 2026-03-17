@@ -20,6 +20,7 @@ app.include_router(exchange.router, prefix="/api/v1")
 templates = Jinja2Templates(directory="templates")
 
 
+
 @app.middleware("http")
 async def request_log(request: Request, call_next):
     start = time.time()
