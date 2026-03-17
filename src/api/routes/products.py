@@ -10,7 +10,11 @@ router = APIRouter(prefix="/products", tags=["products"])
 redis_client = redis.Redis(host="localhost", port=6379, db=0, socket_timeout=0.5)
 
 @router.post("/", response_model=Product, status_code=201)
-async def create_product(product_data: ProductCreate, db = Depends(get_products_from_db)):
+async def create_product(
+        product_data: ProductCreate,
+        db = Depends(get_products_from_db),
+        user_id: int = Depends(get_current_user),
+    ):
     try:
         product = await ProductService.create_product(product_data, db)
         return product
@@ -21,14 +25,21 @@ async def create_product(product_data: ProductCreate, db = Depends(get_products_
 
 
 @router.get("/{product_id}", response_model=Product, status_code=200)
-async def get_product(product_id: int, db = Depends(get_products_from_db)):
+async def get_product(
+        product_id: int,
+        db = Depends(get_products_from_db),
+        user_id: int = Depends(get_current_user)
+    ):
     try:
         return await ProductService.get_product(product_id, db)
     except ValueError:
         raise HTTPException(status_code=404, detail="Product not found")
 
 @router.get("/")
-async def get_products(db = Depends(get_products_from_db)):
+async def get_products(
+        db = Depends(get_products_from_db),
+        user_id: int = Depends(get_current_user)
+    ):
     try:
         cached = redis_client.get("products")
         if cached:

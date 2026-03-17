@@ -3,6 +3,7 @@ from src.api.auth import create_token
 from src.models.user import User, UserCreate
 from src.services.user_service import UserService
 from src.db.db_connect import get_users_from_db
+from src.data import users
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -27,6 +28,9 @@ async def get_user(user_id: int, db = Depends(get_users_from_db)):
 
 
 @router.post("/login")
-async def login():
-    # пока без БД (тест)
-    return {"access_token": create_token("user1")}
+async def login(user_id: int):
+    if user_id not in users:
+        raise HTTPException(status_code=404, detail="User not found")
+    token = create_token(user_id)
+    return {"token": token}
+
