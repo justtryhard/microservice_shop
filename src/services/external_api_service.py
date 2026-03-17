@@ -1,7 +1,3 @@
-# сервис отключен в этой версии
-
-
-
 import requests
 from typing import Optional, List
 from requests.exceptions import RequestException
@@ -9,7 +5,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-class MultiExchangeClient:
+class ExchangeClient:
     """API client for couple exchange rates"""
 
     def __init__(self, api_urls: List[str]):

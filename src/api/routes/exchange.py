@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException
-from src.services.multi_exchange_client import MultiExchangeClient
+from src.services.external_api_service import ExchangeClient
 
-router = APIRouter(prefix="/api/v1/currency", tags=["currency"])
+router = APIRouter(prefix="/currency", tags=["currency"])
 
-exchange_client = MultiExchangeClient([
+exchange_client = ExchangeClient([
     "https://first.non-working.api/latest",
     "https://second.non-working.api/v3/latest",
     "https://api.exchangerate-api.com/v4/latest"        # рабочий
