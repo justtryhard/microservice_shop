@@ -6,7 +6,7 @@ import redis, json
 
 router = APIRouter(prefix="/products", tags=["products"])
 
-redis_client = redis.Redis(host="localhost", port=6379, db=0)
+redis_client = redis.Redis(host="localhost", port=6379, db=0, socket_timeout=0.5)
 
 @router.post("/", response_model=Product, status_code=201)
 async def create_product(product_data: ProductCreate):
@@ -35,5 +35,6 @@ async def get_products():
         products = await ProductService.get_products()
         redis_client.setex("products", 3600, json.dumps(products))
         return products
-    except redis.exceptions.ConnectionError:  # если редис недоступен, идём сразу в БД
+    except (redis.exceptions.ConnectionError, redis.exceptions.TimeoutError):# если редис недоступен, идём сразу в БД
+        print('Redis is not available')
         return await ProductService.get_products()
