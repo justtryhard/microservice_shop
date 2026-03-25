@@ -1,6 +1,9 @@
 from src.models.order import OrderCreate, Order
 from src.clients.payment_client import PaymentClient
+import queue
 
+
+task_queue = queue.Queue()
 
 class OrderService:
     payment_client = PaymentClient()
@@ -40,3 +43,51 @@ class OrderService:
             raise ValueError("Order not found")
         return orders_db[order_id]
 
+
+
+# Архитектура системы с брокером сообщений для проекта SFMShop:
+#
+# 1. Producer (src/api/main.py или OrderService):
+#    При создании заказа отправляет задачи в очередь:
+#        - отправка email-уведомления пользователю
+#        - обновление остатков товаров на складе
+#        - генерация отчетов
+#        - логирование
+#
+#    Пример:
+#        task_queue.put({"task": "send_email", "order_id": new_id})
+#        task_queue.put({"task": "update_stock", "order_id": new_id})
+#
+# 2. Очередь сообщений:
+#    - Хранит задачи для обработки
+#    - Обеспечивает надежность доставки
+#
+# 3. Consumer (src/services/queue_consumer.py):
+#    - Постоянно слушает очередь и получает задачи из неё
+#    - Обрабатывает задачи в фоне
+#    - Обрабатывает ошибки и retry
+#
+#    Пример задач:
+#        if task == "send_email":
+#            send_email(...)
+#        elif task == "update_stock":
+#            update_stock(...)
+#        elif task == "generate_report":
+#            generate_report(...)
+#
+# 4. Надежность:
+#    - Сообщения не теряются
+#    - Обработки подтверждаются
+#    - Retry при ошибках
+#
+# 5. Преимущества:
+#    - Быстрый ответ API
+#    - Масштабируемость
+#    - Разделение ответственности
+#    - Устойчивость к сбоям
+#
+# 6. Порядок работы:
+#    Клиент -> API -> создание заказа -> отправка задач в очередь ->
+#    -> Consumer обрабатывает задачи -> пользователь не ждет фоновые операции
+#
+#
