@@ -35,10 +35,7 @@ class OrderService:
             raise Exception(f"Payment processing failed: {e}")
 
         producer = QueueProducer()
-        producer.send_message("order_tasks", {
-            "task": "create_order",
-            "order_id": new_id
-        })
+        producer.send_order_task(new_id, "create_order", {'products': order_data.product_ids})
         producer.close()
         new_order = Order(user=user, products=product_list, payment_status=payment_status)
         orders_db[new_id] = new_order

@@ -12,49 +12,61 @@ class QueueConsumer:
         self.channel = self.connection.channel()
         self.channel.queue_declare(queue=self.queue_name, durable=True)
         self.channel.basic_qos(prefetch_count=1)
+        self.max_retries = 3
 
-    def process_task(self, message: dict):
-        task = message.get("task")
-        if task == "create_order":
-            print(f"creating order {message['order_id']}")
-        else:
-            print("unknown task")
-
-    def callback(self, ch, method, properties, body):
-        message = json.loads(body)
-        retry_count = message.get("retry", 0)
+    def process_task(self, ch, method, properties, body):
         try:
-            print(f"received: {message}")
-            self.process_task(message)
-            ch.basic_ack(delivery_tag=method.delivery_tag)
+            message = json.loads(body)
+            task = message["task"]
+            retry_count = properties.headers.get('x-retry-count', 0) if properties.headers else 0
 
-        except Exception as e:
-            print(e)
-            if retry_count < 3:
-                message["retry"] = retry_count + 1
-                time.sleep(1)
-                ch.basic_publish(
-                    exchange="",
-                    routing_key=self.queue_name,
-                    body=json.dumps(message),
-                    properties=pika.BasicProperties(
-                        delivery_mode=2
-                    ),
-                )
-                print(f"retrying {message['retry']}")
+            if task == "create_order":
+                print(f"creating order {message['order_id']}: {message['products']}")
             else:
-                print("failed aftre all retries:")
+                print("unknown task")
             ch.basic_ack(delivery_tag=method.delivery_tag)
+            print(f"task processed")
+        except Exception as e:
+            print(f"processing failure {e}")
+
+            if retry_count < self.max_retries:
+                retry_count += 1
+                delay = 2 ** retry_count
+
+                print(f"next retry {retry_count}/{self.max_retries} in {delay} sec")
+                time.sleep(delay)
+
+                ch.basic_publish(
+                    exchange='',
+                    routing_key='order_processing',
+                    body=body,
+                    properties=pika.BasicProperties(
+                        delivery_mode=2,
+                        headers={'x-retry-count': retry_count}
+                    )
+                )
+
+                ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
+            else:
+                ch.basic_publish(
+                    exchange='',
+                    routing_key='order_processing_errors',
+                    body=body,
+                    properties=pika.BasicProperties(delivery_mode=2)
+                )
+
+                ch.basic_ack(delivery_tag=method.delivery_tag)
+                print(f"task send to queue after {self.max_retries} retries")
 
     def start(self):
         print("consumer is waiting")
         self.channel.basic_consume(
             queue=self.queue_name,
-            on_message_callback=self.callback,
+            on_message_callback=self.process_task
         )
         self.channel.start_consuming()
 
 
 if __name__ == "__main__":
-    consumer = QueueConsumer("order_tasks")
+    consumer = QueueConsumer("order_processing")
     consumer.start()
