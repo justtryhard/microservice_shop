@@ -6,13 +6,23 @@ import time
 class QueueConsumer:
     def __init__(self, queue_name: str, host: str = "localhost"):
         self.queue_name = queue_name
-        self.connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host=host)
-        )
-        self.channel = self.connection.channel()
-        self.channel.queue_declare(queue=self.queue_name, durable=True)
-        self.channel.basic_qos(prefetch_count=1)
+        self.host = host
+        self.connection = None
+        self.channel = None
         self.max_retries = 3
+
+    def connect(self):
+        try:
+            self.connection = pika.BlockingConnection(
+                pika.ConnectionParameters(self.host)
+            )
+            self.channel = self.connection.channel()
+            self.channel.queue_declare(queue=self.queue_name, durable=True)
+            self.channel.basic_qos(prefetch_count=1)
+            return True
+        except Exception as e:
+            print(e)
+            return False
 
     def process_task(self, ch, method, properties, body):
         try:
@@ -59,13 +69,18 @@ class QueueConsumer:
                 print(f"task send to queue after {self.max_retries} retries")
 
     def start(self):
+        if not self.connect():
+            return
         print("consumer is waiting")
         self.channel.basic_consume(
             queue=self.queue_name,
             on_message_callback=self.process_task
         )
-        self.channel.start_consuming()
-
+        try:
+            self.channel.start_consuming()
+        except KeyboardInterrupt:
+            self.channel.stop_consuming()
+            self.connection.close()
 
 if __name__ == "__main__":
     consumer = QueueConsumer("order_processing")
