@@ -1,7 +1,10 @@
 import pika
 import json
 import time
+import logging
 
+
+logging.basicConfig(level=logging.INFO)
 
 class QueueConsumer:
     def __init__(self, queue_name: str, host: str = "localhost"):
@@ -10,6 +13,7 @@ class QueueConsumer:
         self.connection = None
         self.channel = None
         self.max_retries = 3
+        self.queue_name = "order_processing"
 
     def connect(self):
         try:
@@ -21,7 +25,7 @@ class QueueConsumer:
             self.channel.basic_qos(prefetch_count=1)
             return True
         except Exception as e:
-            print(e)
+            logging.error(f"Connection error: {e}")
             return False
 
     def process_task(self, ch, method, properties, body):
@@ -31,19 +35,20 @@ class QueueConsumer:
             retry_count = properties.headers.get('x-retry-count', 0) if properties.headers else 0
 
             if task == "create_order":
-                print(f"creating order {message['order_id']}: {message['products']}")
+                products = message["data"]["products"]
+                logging.info(f"Creating order {message['order_id']}: {'products'}")
             else:
-                print("unknown task")
+                logging.error("unknown task")
             ch.basic_ack(delivery_tag=method.delivery_tag)
-            print(f"task processed")
+            logging.info(f"task processed")
         except Exception as e:
-            print(f"processing failure {e}")
+            logging.error(f"Processing failure: {e}")
 
             if retry_count < self.max_retries:
                 retry_count += 1
                 delay = 2 ** retry_count
 
-                print(f"next retry {retry_count}/{self.max_retries} in {delay} sec")
+                logging.info(f"next retry {retry_count}/{self.max_retries} in {delay} sec")
                 time.sleep(delay)
 
                 ch.basic_publish(
@@ -66,12 +71,12 @@ class QueueConsumer:
                 )
 
                 ch.basic_ack(delivery_tag=method.delivery_tag)
-                print(f"task send to queue after {self.max_retries} retries")
+                logging.warning(f"Task send to queue after {self.max_retries} retries")
 
     def start(self):
         if not self.connect():
             return
-        print("consumer is waiting")
+        logging.info("consumer is waiting")
         self.channel.basic_consume(
             queue=self.queue_name,
             on_message_callback=self.process_task

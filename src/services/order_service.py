@@ -1,9 +1,7 @@
 from src.models.order import OrderCreate, Order
 from src.clients.payment_client import PaymentClient
-import queue
-from src.services.queue_producer import QueueProducer
-
-task_queue = queue.Queue()
+from src.services.queue_producer import producer1
+import logging
 
 class OrderService:
     payment_client = PaymentClient()
@@ -34,9 +32,10 @@ class OrderService:
         except Exception as e:
             raise Exception(f"Payment processing failed: {e}")
 
-        producer = QueueProducer()
-        producer.send_order_task(new_id, "create_order", {'products': order_data.product_ids})
-        producer.close()
+        try:
+            producer1.send_order_task(new_id, "create_order", {'products': order_data.product_ids})
+        except Exception as e:
+            logging.error(f"Failed to send task: {e}")
         new_order = Order(user=user, products=product_list, payment_status=payment_status)
         orders_db[new_id] = new_order
         return new_order

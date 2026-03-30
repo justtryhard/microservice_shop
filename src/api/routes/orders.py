@@ -19,7 +19,7 @@ async def create_order(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        # любые другие ошибки (включая траблы с payment srevice)
+        # любые другие ошибки (включая траблы с payment service)
         raise HTTPException(status_code=502, detail=str(e))
 
 
