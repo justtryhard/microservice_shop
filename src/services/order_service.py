@@ -34,6 +34,9 @@ class OrderService:
 
         try:
             producer1.send_order_task(new_id, "create_order", {'products': order_data.product_ids})
+            producer1.send_order_task(new_id, "send_email", {"user_id": user.name, "email": user.email})
+            producer1.send_order_task(new_id, "update_stock", {"products": order_data.product_ids})
+            producer1.send_order_task(new_id, "generate_report", {"order_id": new_id})
         except Exception as e:
             logging.error(f"Failed to send task: {e}")
         new_order = Order(user=user, products=product_list, payment_status=payment_status)

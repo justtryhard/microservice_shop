@@ -36,7 +36,16 @@ class QueueConsumer:
 
             if task == "create_order":
                 products = message["data"]["products"]
-                logging.info(f"Creating order {message['order_id']}: {'products'}")
+                logging.info(f"Creating order {message['order_id']}: {products}")
+            elif task == "send_email":
+                email = message["data"]["email"]
+                logging.info(f"Sending email to {email}")
+            elif task == "update_stock":
+                products = message["data"]["products"]
+                logging.info(f"Updating stock for {products}")
+            elif task == "generate_report":
+                order_id = message["data"]["order_id"]
+                logging.info(f"Generating report for {order_id}")
             else:
                 logging.error("unknown task")
             ch.basic_ack(delivery_tag=method.delivery_tag)
