@@ -10,8 +10,8 @@ class OrderCreate(BaseModel):
 
 
 class Order(BaseModel):
-    user: Optional[User] = None
-    products: Optional[List[Product]] = None
+    user: Optional[User]
+    products: Optional[List[Product]] = Field(..., min_length=1)
     payment_status: bool = False
 
     def calculate_total(self):

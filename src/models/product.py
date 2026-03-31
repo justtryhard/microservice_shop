@@ -14,9 +14,15 @@ class ProductCreate(BaseModel):
         return v.strip()
 
 class Product(BaseModel):
-    name: Optional[str] = None
-    price: Optional[float] = None
-    quantity: Optional[int] = None
+    name: Optional[str] = Field(..., min_length=1, max_length=100)
+    price: Optional[float] = Field(..., gt=0)
+    quantity: Optional[int] = Field(..., ge=0)
+
+    @field_validator('name')
+    def validate_name(cls, v):
+        if not v.strip():
+            raise ValueError('name should not be empty')
+        return v.strip()
 
     def get_total_price(self):
         return self.price * self.quantity
