@@ -21,6 +21,7 @@ def test_calculate_discount(order_total, rate, expected_discount):
         (1, 100, 20, 110),
         (5, 100, 90, 360),
         (0, 100, 50, 190),
+        (2, 50, 10, 70)
     ]
 )
 def test_calculate_delivery(weight, base_cost, mileage, expected_delivery_price):
