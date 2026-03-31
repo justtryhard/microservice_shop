@@ -16,15 +16,15 @@ def test_calculate_discount(order_total, rate, expected_discount):
 
 
 
-@pytest.mark.parametrize("weight, base_cost, expected_delivery_price",
+@pytest.mark.parametrize("weight, base_cost, mileage, expected_delivery_price",
     [
-        (1, 100, 110),
-        (5, 100, 150),
-        (0, 100, 100),
+        (1, 100, 20, 110),
+        (5, 100, 90, 360),
+        (0, 100, 50, 190),
     ]
 )
-def test_calculate_delivery(weight, base_cost, expected_delivery_price):
-    assert calculate_delivery(weight, base_cost) == expected_delivery_price
+def test_calculate_delivery(weight, base_cost, mileage, expected_delivery_price):
+    assert calculate_delivery(weight, mileage, base_cost) == expected_delivery_price
 
 
 
