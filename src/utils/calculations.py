@@ -1,3 +1,5 @@
+import requests
+
 MILEAGE_RATE = 3
 FREE_MILEAGE = 20
 
@@ -13,3 +15,8 @@ def calculate_delivery(weight, mileage=20, base_cost=100) -> float:
 
 def calculate_final_price(price, discount, delivery):
     return price - discount + delivery
+
+def get_usd_rate():
+    response = requests.get("https://api.exchangerate-api.com/v4/latest/USD")
+    data = response.json()
+    return data["rates"]["RUB"]

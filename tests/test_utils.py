@@ -1,6 +1,6 @@
 import pytest
-from src.utils.calculations import calculate_discount, calculate_delivery, calculate_final_price
-
+from src.utils.calculations import calculate_discount, calculate_delivery, calculate_final_price, get_usd_rate
+from unittest.mock import patch
 
 
 @pytest.mark.parametrize("order_total, rate, expected_discount",
@@ -39,3 +39,11 @@ def test_calculate_delivery(weight, base_cost, mileage, expected_delivery_price)
 )
 def test_calculate_final_price(price, discount, delivery, expected):
     assert calculate_final_price(price, discount, delivery) == expected
+
+@patch("src.utils.calculations.requests.get")
+def test_get_usd_rate(mock_get):
+    mock_get.return_value.json.return_value = {"rates": {"RUB": 85.0}}
+    mock_get.return_value.status_code = 200
+    result = get_usd_rate()
+    assert result == 85.0
+    mock_get.assert_called_once()
