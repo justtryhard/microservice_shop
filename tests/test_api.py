@@ -20,6 +20,7 @@ def test_get_products(mock_get_products, mock_redis_client):
     assert isinstance(data, dict)
     assert "1" in data or 1 in data
     mock_get_products.assert_called_once()
+    mock_redis_client.get.assert_called_once()
 
 
 @patch("src.data.users")
