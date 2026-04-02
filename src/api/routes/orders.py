@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from src.models.order import OrderCreate, Order
 from src.db.db_connect import get_products_from_db, get_orders_from_db, get_users_from_db
 from src.services.order_service import OrderService
+from src.services.log_service import log_service
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
@@ -13,6 +14,7 @@ async def create_order(
         products_db = Depends(get_products_from_db),
         orders_db = Depends(get_orders_from_db)
         ):
+    log_service.info("Starting to create new order")
     try:
         order = await OrderService.create_order(order_data, users_db, products_db, orders_db)
         return order
@@ -27,5 +29,5 @@ async def create_order(
 async def get_order(order_id: int, orders_db = Depends(get_orders_from_db)):
     try:
         return await OrderService.get_order(order_id, orders_db)
-    except ValueError:
+    except ValueError as e:
         raise HTTPException(status_code=404, detail="Order not found")
