@@ -4,10 +4,13 @@ from src.db.db_connect import get_products_from_db
 from src.models.product import Product, ProductCreate
 from src.services.product_service import ProductService
 import redis, json
+from src.config import REDIS_URL
 
 router = APIRouter(prefix="/products", tags=["products"])
 
-redis_client = redis.Redis(host="localhost", port=6379, db=0, socket_timeout=0.5)
+
+redis_client = redis.Redis(host=REDIS_URL, port=6379, db=0, socket_timeout=0.5)
+
 
 @router.post("/", response_model=Product, status_code=201)
 async def create_product(

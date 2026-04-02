@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from src.api.routes import orders, users, products, exchange
 import time
-from src.services.queue_producer import QueueProducer
+
 
 app = FastAPI(
     title="Order Service",
