@@ -2,7 +2,7 @@
 ## Склонировать проект и перейти в папку
 ```
 git clone https://github.com/justtryhard/microservice_shop/
-cd SFMShop_v2.0
+cd microservice_shop
 ```
 
 # Настройка окружения
