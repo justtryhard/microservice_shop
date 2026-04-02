@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: microserviceshop-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: microserviceshop
+  template:
+    metadata:
+      labels:
+        app: microserviceshop
+    spec:
+      containers:
+      - name: app
+        image: microserviceshop:latest
+        imagePullPolicy: Never    # чтобы брал только локальный образ
+        ports:
+        - containerPort: 8000
+        env:
+        - name: REDIS_URL
+          value: "redis://redis:6379"
