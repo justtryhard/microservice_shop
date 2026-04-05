@@ -24,7 +24,6 @@ jobs:
 
       - name: run tests
         run: |
-          export PYTHONPATH=.
           pytest --cov=src --cov-report=xml
 
 
