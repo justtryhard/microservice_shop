@@ -7,6 +7,8 @@ from src.models.user import User
 
 client = TestClient(app)
 
+@patch("src.api.auth.SECRET_KEY", "testsecret")
+@patch("src.api.auth.ALGORITHM", "HS256")
 @patch("src.api.routes.products.redis_client")
 @patch("src.services.product_service.ProductService.get_products")
 def test_get_products(mock_get_products, mock_redis_client):
