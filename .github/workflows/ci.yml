@@ -20,25 +20,19 @@ jobs:
       - name: create venv
         run: python -m venv .venv
 
-      - name: activate venv
-        run: | 
-          source .venv/bin/activate
-          python -m pip install --upgrade pip
-
       - name: install dependencies
         run: | 
+          source .venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Check redis version
         run: |
-          source .venv/bin/activate
-          python -c "import redis; print(redis.__file__, redis.__version__)"
+         .venv/bin/python -c "import redis; print(redis.__file__, redis.__version__)"
 
       - name: run tests
         run: |
-          source .venv/bin/activate
           export PYTHONPATH=.
-          pytest --cov=src --cov-report=xml
+          .venv/bin/python pytest --cov=src --cov-report=xml
 
 
