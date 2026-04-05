@@ -17,6 +17,10 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Clean old redis
+        run: |
+          python -m pip uninstall -y redis
+
       - name: install dependencies
         run: | 
           python -m venv .venv
