@@ -17,14 +17,11 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: create venv
-        run: python -m venv .venv
-
       - name: install dependencies
         run: | 
-          source .venv/bin/activate
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip
+          .venv/bin/python pip install -r requirements.txt
 
       - name: Check redis version
         run: |
