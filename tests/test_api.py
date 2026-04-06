@@ -4,8 +4,6 @@ from unittest.mock import patch
 from src.api.auth import create_token, verify_token
 from src.models.product import Product
 from src.models.user import User
-from jose import jwt, JWTError
-import pytest
 
 
 client = TestClient(app)
@@ -31,7 +29,8 @@ def test_get_products_unauthorized():
     response = client.get("/api/v1/products/")
     assert response.status_code == 401
 
-
+@patch("src.api.auth.SECRET_KEY", "testsecret")
+@patch("src.api.auth.ALGORITHM", "HS256")
 @patch("src.api.routes.products.redis_client")
 def test_get_products_cache(mock_redis):
     token = create_token(user_id=1)
@@ -40,6 +39,9 @@ def test_get_products_cache(mock_redis):
     response = client.get("/api/v1/products/", headers=headers)
     assert response.status_code == 200
 
+
+@patch("src.api.auth.SECRET_KEY", "testsecret")
+@patch("src.api.auth.ALGORITHM", "HS256")
 @patch("src.api.routes.products.redis_client")
 @patch("src.services.product_service.ProductService.get_products")
 def test_get_products_empty(mock_get_products, mock_redis):
@@ -238,11 +240,15 @@ def test_convert_invalid_currency(mock_client):
     assert response.status_code == 503
     assert response.json()["detail"] == "service unavailable"
 
-
+@patch("src.api.auth.SECRET_KEY", "testsecret")
+@patch("src.api.auth.ALGORITHM", "HS256")
 def test_create_token_returns_str():
     token = create_token(user_id=123)
     assert isinstance(token, str)
 
+
+@patch("src.api.auth.SECRET_KEY", "testsecret")
+@patch("src.api.auth.ALGORITHM", "HS256")
 def test_verify_token_valid():
     token = create_token(user_id=456)
     user_id = verify_token(token)
