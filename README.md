@@ -27,7 +27,9 @@ pip install requirements.txt
 pip freeze > requirements.txt
 ```
 
-
+## Создание переменных окружения
+- Создать файл .env  
+- Внести значения переменных по образцу файла .env.example  
 
 # Запуск
 ```
