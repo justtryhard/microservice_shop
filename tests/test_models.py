@@ -21,6 +21,7 @@ def sample_order(sample_user, sample_product1, sample_product2):
     return Order(user=sample_user, products=[sample_product1, sample_product2])
 
 
+
 def test_create_product(sample_product1):
     assert sample_product1.name == "bread"
     assert sample_product1.price == 50
