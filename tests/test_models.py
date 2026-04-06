@@ -16,6 +16,10 @@ def sample_product2():
 def sample_user():
     return User(name="TestUser", email="abc@test.com")
 
+@pytest.fixture
+def sample_order(sample_user, sample_product1, sample_product2):
+    return Order(user=sample_user, products=[sample_product1, sample_product2])
+
 
 def test_create_product(sample_product1):
     assert sample_product1.name == "bread"
@@ -29,6 +33,10 @@ def test_invalid_product_price():
 def test_invalid_product_name():
     with pytest.raises(ValueError):
         Product(name="", price=100, quantity=1)
+
+def test_invalid_product_quantity():
+    with pytest.raises(Exception):
+        Product(name="abc", price=50, quantity=-1)
 
 def test_create_user(sample_user):
     assert sample_user.name == "TestUser"
@@ -47,17 +55,11 @@ def test_create_order(sample_user, sample_product1, sample_product2):
 
 
 
-def test_calculate_total():
-    """Тест: расчет стоимости заказа"""
-    product1 = Product(name="bread", price=50, quantity=2)
-    product2 = Product(name="cheese", price=150, quantity=3)
-    product3 = Product(name="milk", price=85, quantity=1)
-    products = [product1, product2, product3]
-    user1 = User(name="TestUser", email="test@test.com")
-    order = Order(user=user1, products=products)
-    total = order.calculate_total()
-    assert total == 635
+def test_order_calculate_total(sample_order):
+    assert sample_order.calculate_total() == 355
 
 def test_empty_order(sample_user):
     with pytest.raises(Exception):
         Order(user=sample_user, products=[])
+
+
